@@ -1,11 +1,118 @@
-<html>
+<html lang="ru">
 <head>
     <title>RPG</title>
     <script src=https://code.jquery.com/jquery-3.6.0.min.js></script>
     <link href="/css/my.css" rel="stylesheet">
+
+    <link rel="icon" type="image/x-icon" href="/resources/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap"
+          rel="stylesheet">
 </head>
 <body>
-<h1>RPG admin panel</h1>
+<header class="header">
+    <h1>RPG admin panel</h1>
+</header>
+<section>
+    <div class="quantity-per-page">
+        <label for="quantity">Quantity per page</label>
+        <select id="quantity" name="quantity-per-page">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+        </select>
+    </div>
+    <div class="this-is-table">
+        <ul id="1" class="table">
+            <li class="table-header">
+                <span>#</span>
+                <span>Name</span>
+                <span>Title</span>
+                <span>Race</span>
+                <span>Profession</span>
+                <span>Level</span>
+                <span>Birthday</span>
+                <span>Banned</span>
+            </li>
+        </ul>
+    </div>
+    <div class="pagination">
+        <div>Pages</div>
+    </div>
+</section>
 
+<script>
+    const fields = ['id', 'name', 'title', 'race', 'profession', 'level', 'birthday', 'banned'];
+    const table = document.querySelector(".table");
+    const pagination = document.querySelector(".pagination");
+    const selectElement = document.getElementById("quantity");
+
+    let currentPage = 0;
+    let countPerPage = selectElement.value;
+
+    async function getListData() {
+        const response = await fetch(`/rest/players?pageNumber=${currentPage}&pageSize=${countPerPage}`);
+        const playersArrays = await response.json();
+        removeBodyTable();
+        playersArrays.forEach(item => {
+            createBodyTable(item);
+        });
+
+
+    }
+    function removeBodyTable(){
+        const allLiElement = document.querySelectorAll(".table-row");
+        allLiElement.forEach(li => {li.remove()});
+    }
+
+    function createBodyTable(item) {
+        const row = document.createElement("li");
+        row.className = "table-row";
+        fields.forEach(field => {
+            const span = document.createElement("span");
+            let value = item[field];
+            if (field === "birthday") {
+                value = new Date(value).toLocaleDateString();
+            }
+            span.textContent = value;
+            row.appendChild(span);
+        })
+        table.appendChild(row);
+    }
+
+    async function countNumberOfPages() {
+        const response = await fetch("/rest/players/count");
+        const countPagesByServer = await response.json();
+        const countPages = Math.ceil(countPagesByServer / countPerPage);
+        createListPages(countPages);
+    }
+
+    function createListPages(countPages) {
+        const allSpanChild = pagination.querySelectorAll("span");
+        allSpanChild.forEach(span => {
+            span.remove();
+        });
+        for (let i = 1; i <= countPages; i++) {
+            const span = document.createElement("span");
+            span.textContent = i;
+            pagination.appendChild(span);
+        }
+    }
+
+    async function start() {
+        await countNumberOfPages();
+        await getListData();
+
+        selectElement.addEventListener('change', function () {
+            countPerPage = this.value;
+            countNumberOfPages();
+            getListData();
+        });
+    }
+
+    window.onload = start;
+</script>
 </body>
 </html>
