@@ -44,6 +44,7 @@
 </section>
 
 <script>
+
     const fields = ['id', 'name', 'title', 'race', 'profession', 'level', 'birthday', 'banned'];
     const table = document.querySelector(".table");
     const pagination = document.querySelector(".pagination");
@@ -51,9 +52,11 @@
 
     let currentPage = 0;
     let countPerPage = selectElement.value;
+    const pathCountPages = "/rest/players/count";
+    const pathDataForTable = "/rest/players";
 
     async function getListData() {
-        const response = await fetch(`/rest/players?pageNumber=${currentPage}&pageSize=${countPerPage}`);
+        const response = await fetch(`${pathDataForTable}?pageNumber=${currentPage}&pageSize=${countPerPage}`);
         const playersArrays = await response.json();
         removeBodyTable();
         playersArrays.forEach(item => {
@@ -83,21 +86,28 @@
     }
 
     async function countNumberOfPages() {
-        const response = await fetch("/rest/players/count");
+        const response = await fetch(pathCountPages);
         const countPagesByServer = await response.json();
         const countPages = Math.ceil(countPagesByServer / countPerPage);
-        createListPages(countPages);
+        updateListPages(countPages);
     }
 
-    function createListPages(countPages) {
-        const allSpanChild = pagination.querySelectorAll("span");
-        allSpanChild.forEach(span => {
-            span.remove();
+    function updateListPages(countPages) {
+        const allLabelChild = pagination.querySelectorAll("label");
+        allLabelChild.forEach(label => {
+            label.remove();
         });
         for (let i = 1; i <= countPages; i++) {
-            const span = document.createElement("span");
-            span.textContent = i;
-            pagination.appendChild(span);
+            const radio = document.createElement("input");
+            const label = document.createElement("label");
+            radio.type = "radio";
+            radio.name = "page";
+            if(i === 1){
+                radio.checked = true;
+            }
+            label.textContent = i.toString();
+            label.appendChild(radio);
+            pagination.appendChild(label);
         }
     }
 

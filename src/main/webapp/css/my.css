@@ -5,13 +5,8 @@ body {
 }
 h1 {
     text-align: center;
-    border: 2px solid black;
 }
-h1:hover{
-    color: blueviolet;
-    transform: scale(1.3);
-    transition: color 2s, transform 1s;
-}
+
 section {
     display: grid;
     justify-content: center;
@@ -61,7 +56,8 @@ ul {
 
      */
 }
-.pagination span {
+
+/*.pagination inpu {
     border: 1px solid darkred;
     padding: 3px;
 }
@@ -71,7 +67,30 @@ ul {
     transform: scale(1.1);
     transition: transform 0.1s ease;
 }
+*/
+
 
 .quantity-per-page{
     justify-self: start;
+}
+
+/*для оформления кнопок страницы */
+input[type="radio"] {
+
+}
+
+.pagination label {
+    /*cursor: pointer; /* Указываем, что метка кликабельна */
+    padding: 8px 12px; /* Добавляем отступы для меток */
+    border: 1px solid #ccc; /* Добавляем рамку */
+    border-radius: 4px; /* Закругляем углы */
+    margin: 0 5px; /* Добавляем отступы между метками */
+    background-color: #f9f9f9; /* Цвет фона */
+    transition: background-color 2s; /* Плавный переход для фона */
+
+}
+
+.pagination input[type="radio"]:checked {
+    background-color: red;/*#007bff; /* Цвет фона для выбранной метки */
+    color: white; /* Цвет текста для выбранной метки */
 }
