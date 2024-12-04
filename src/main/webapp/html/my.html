@@ -1,6 +1,7 @@
-<html lang="ru">
+<html lang="ru" xmlns="http://www.w3.org/1999/html">
 <head>
     <title>RPG</title>
+    <meta charset="UTF-8">
     <script src=https://code.jquery.com/jquery-3.6.0.min.js></script>
     <link href="/css/my.css" rel="stylesheet">
 
@@ -14,7 +15,10 @@
 <header class="header">
     <h1>RPG admin panel</h1>
 </header>
-<section>
+<section class="section-table">
+    <div class="fixed-element">
+        I am fixed element
+    </div>
     <div class="quantity-per-page">
         <label for="quantity">Quantity per page</label>
         <select id="quantity" name="quantity-per-page">
@@ -25,101 +29,390 @@
         </select>
     </div>
     <div class="this-is-table">
-        <ul id="1" class="table">
+        <div class="this-is-caption"><span>Account list</span></div>
+        <ul class="table">
             <li class="table-header">
-                <span>#</span>
-                <span>Name</span>
-                <span>Title</span>
-                <span>Race</span>
-                <span>Profession</span>
-                <span>Level</span>
-                <span>Birthday</span>
-                <span>Banned</span>
+                <div class="table-cell"><span>#</span></div>
+                <div class="table-cell"><span>Name</span></div>
+                <div class="table-cell"><span>Title</span></div>
+                <div class="table-cell"><span>Race</span></div>
+                <div class="table-cell"><span>Profession</span></div>
+                <div class="table-cell"><span>Level</span></div>
+                <div class="table-cell"><span>Birthday</span></div>
+                <div class="table-cell"><span>Banned</span></div>
+                <div class="table-cell"><span>Edit</span></div>
+                <div class="table-cell"><span>Delete</span></div>
             </li>
         </ul>
     </div>
     <div class="pagination">
-        <div>Pages</div>
+        <div class="pagination-legend"><span>Pages</span></div>
+    </div>
+    <hr>
+    <div class="account-create">
+        <fieldset>
+            <legend>Account creation</legend>
+            <form class="form-create" action="/rest/players" method="post">
+                <label> Name (1-12 length):
+                    <input type="text" name="name" minlength="1" maxlength="12" required placeholder="Ivan">
+                </label>
+                <label> Title (1-30 length):
+                    <input type="text" name="title" minlength="1" maxlength="30" required placeholder="developer">
+                </label>
+                <label> Race:
+                    <select name="race" class="add-select-race" required>
+                    </select>
+                </label>
+                <label> Profession:
+                    <select name="profession" class="add-select-profession" required>
+                    </select>
+                </label>
+                <label> Level (1-100):
+                    <input type="number" name="level" min="1" max="100" required placeholder="1">
+                </label>
+                <label> Birthday:
+                    <input type="date" name="birthday" min="2000-01-01" max="2999-12-31" required>
+                </label>
+                <label> Banned:
+                    <select name="banned">
+                        <option value="true">true</option>
+                        <option value="false" selected>false</option>
+                    </select>
+                </label>
+                <button type="submit">Create Account</button>
+            </form>
+        </fieldset>
     </div>
 </section>
 
+<footer>
+    <p>
+        <span>&copy; 2024</span>
+    </p>
+</footer>
 <script>
+    const dataEnumToColumns = {
+        race: ['HUMAN', 'DWARF', 'ELF', 'GIANT', 'ORC', 'TROLL', 'HOBBIT'],
+        profession: ['WARRIOR', 'ROGUE', 'SORCERER', 'CLERIC', 'PALADIN', 'NAZGUL', 'WARLOCK', 'DRUID'],
+        banned: [true, false]
+    };
+    const arrayNamesColumnsTable = ['id', 'name', 'title', 'race', 'profession', 'level', 'birthday', 'banned', 'edit', 'delete'];
+    const arrayEditColumns = ['name', 'title', 'race', 'profession', 'banned'];
 
-    const fields = ['id', 'name', 'title', 'race', 'profession', 'level', 'birthday', 'banned'];
+    const quantityForPage = document.getElementById("quantity");
+    quantityForPage.addEventListener('change', async function () {
+        countPerPage = this.value;
+        currentPage = 0;
+        await renderDisplay();
+    });
     const table = document.querySelector(".table");
-    const pagination = document.querySelector(".pagination");
-    const selectElement = document.getElementById("quantity");
-
+    let totalNumberOfPages;
+    let pagination = document.querySelector(".pagination");
     let currentPage = 0;
-    let countPerPage = selectElement.value;
+    let countPerPage = quantityForPage.value;
+
     const pathCountPages = "/rest/players/count";
     const pathDataForTable = "/rest/players";
+    const pathsSrcImg = {
+        edit: "../img/edit.png",
+        delete: "../img/delete.png",
+        save: "../img/save.png"
+    };
+    const fixElement = document.querySelector('.fixed-element');
+    const setWidthToContentForInputField = (input) => {
+        input.style.width = ((input.value.length + 1) * 9) + 'px';
+    };
 
-    async function getListData() {
-        const response = await fetch(`${pathDataForTable}?pageNumber=${currentPage}&pageSize=${countPerPage}`);
-        const playersArrays = await response.json();
-        removeBodyTable();
-        playersArrays.forEach(item => {
-            createBodyTable(item);
-        });
-
-
-    }
-    function removeBodyTable(){
-        const allLiElement = document.querySelectorAll(".table-row");
-        allLiElement.forEach(li => {li.remove()});
-    }
-
-    function createBodyTable(item) {
-        const row = document.createElement("li");
-        row.className = "table-row";
-        fields.forEach(field => {
-            const span = document.createElement("span");
-            let value = item[field];
-            if (field === "birthday") {
-                value = new Date(value).toLocaleDateString();
-            }
-            span.textContent = value;
-            row.appendChild(span);
-        })
-        table.appendChild(row);
+    function start() {
+        makeFormToCreateAccount();
+        renderDisplay();
     }
 
-    async function countNumberOfPages() {
+    function makeFormToCreateAccount() {
+        addTagIntoOptionForSelectFormCreate(dataEnumToColumns['race'], ".add-select-race");
+        addTagIntoOptionForSelectFormCreate(dataEnumToColumns['profession'], ".add-select-profession");
+    }
+
+    async function renderDisplay() {
+        await calculateNumberOfPages();
+        await updatePaginationIcons();
+        await updateTableBody();
+    }
+
+    async function calculateNumberOfPages() {
         const response = await fetch(pathCountPages);
         const countPagesByServer = await response.json();
-        const countPages = Math.ceil(countPagesByServer / countPerPage);
-        updateListPages(countPages);
+        totalNumberOfPages = Math.ceil(countPagesByServer / countPerPage);
     }
 
-    function updateListPages(countPages) {
-        const allLabelChild = pagination.querySelectorAll("label");
-        allLabelChild.forEach(label => {
-            label.remove();
-        });
-        for (let i = 1; i <= countPages; i++) {
+    async function updatePaginationIcons() {
+        pagination.innerHTML = "";
+        const span = document.createElement('span');
+        span.textContent = 'Pages';
+        pagination.appendChild(span);
+        const pageCorrection = -1;
+        if (currentPage >= totalNumberOfPages && totalNumberOfPages != 0) {
+            currentPage = Number(currentPage) + Number(pageCorrection);
+        }
+        for (let i = 0; i < totalNumberOfPages; i++) {
             const radio = document.createElement("input");
             const label = document.createElement("label");
             radio.type = "radio";
             radio.name = "page";
-            if(i === 1){
+            radio.value = i.toString();
+            radio.id = "page-" + i.toString();
+            radio.addEventListener("change", () => {
+                updateCurrentPage();
+                updateTableBody();
+            });
+            if (i == currentPage) {
                 radio.checked = true;
             }
-            label.textContent = i.toString();
-            label.appendChild(radio);
-            pagination.appendChild(label);
+            label.setAttribute("for", radio.id);
+            label.textContent = (i + 1).toString();
+            pagination.append(radio, label);
         }
     }
 
-    async function start() {
-        await countNumberOfPages();
-        await getListData();
+    function updateCurrentPage() {
+        const radios = document.getElementsByName('page');
+        for (const radio of radios) {
+            if (radio.checked) {
+                currentPage = radio.value;
+                return;
+            }
+        }
+    }
 
-        selectElement.addEventListener('change', function () {
-            countPerPage = this.value;
-            countNumberOfPages();
-            getListData();
+    function addTagIntoOptionForSelectFormCreate(arrayValues, className) {
+        const selectElement = document.querySelector(className);
+        arrayValues.forEach(field => {
+            const option = document.createElement("option");
+            option.value = field;
+            option.textContent = field;
+            selectElement.appendChild(option);
         });
+    }
+
+    async function updateTableBody() {
+        const response = await fetch(`${pathDataForTable}?pageNumber=${currentPage}&pageSize=${countPerPage}`);
+        const responsePlayersArrays = await response.json();
+        removeAllRowsTableBody();
+        responsePlayersArrays.forEach(player => {
+            createBodyTable(player);
+        });
+    }
+
+    function removeAllRowsTableBody() {
+        const allLiElement = document.querySelectorAll(".table-row");
+        allLiElement.forEach(li => {
+            li.remove();
+        });
+    }
+
+    function createBodyTable(player) {
+        const rowTable = document.createElement("li");
+        rowTable.className = "table-row";
+        createAllCellForRow(player, rowTable);
+        table.appendChild(rowTable);
+    }
+
+    function createAllCellForRow(player, rowTable) {
+        arrayNamesColumnsTable.forEach(nameColumn => {
+            const divElement = document.createElement("div");
+            divElement.className = "table-cell";
+            const playerID = player.id;
+
+            let element;
+            if (['edit', 'delete'].includes(nameColumn)) {
+                element = createButton(nameColumn);
+                configureImgIntoButton(element);
+                addEvenHandler(element, playerID);
+            } else if (['race', 'profession', 'banned'].includes(nameColumn)) {
+                element = createSelectElement(dataEnumToColumns[nameColumn], player, nameColumn);
+            } else {
+                element = createInputElements(player, nameColumn);
+                element.addEventListener('input', () => setWidthToContentForInputField(element));
+                setWidthToContentForInputField(element);
+            }
+            element.classList.add(`account-${playerID}`);
+            element.setAttribute("data-field", nameColumn);
+            divElement.appendChild(element);
+            rowTable.appendChild(divElement);
+        })
+    }
+
+    function createInputElements(player, nameField) {
+        let inputElement = document.createElement("input");
+        inputElement.type =
+            nameField === 'birthday'
+                ? 'date'
+                : 'text';
+        inputElement.value =
+            nameField === 'birthday'
+                ? formatDate(player[nameField])
+                : player[nameField];
+        inputElement.readOnly = true;
+        return inputElement;
+    }
+
+    function formatDate(dateValue) {
+        const date = new Date(dateValue);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function createSelectElement(arrayField, player, nameField) {
+        let selectElement = document.createElement("select");
+        selectElement.classList.add('select-table-cell');
+        arrayField.forEach(field => {
+            const optionElement = document.createElement("option");
+            optionElement.value = field;
+            optionElement.textContent = field;
+            if (field === player[nameField]) {
+                optionElement.selected = true;
+            }
+            selectElement.appendChild(optionElement);
+        })
+        selectElement.disabled = true;
+        return selectElement;
+    }
+
+    function createButton(nameField) {
+        const button = document.createElement('button');
+        button.classList.add(`button-${nameField}`);
+        button.setAttribute('data-name-field', nameField);
+        return button;
+    }
+
+    function addEvenHandler(button, playerID) {
+        const handleClick = async () => {
+            const isEditing = button.classList.contains("button-edit");
+            const newValueAttribute = isEditing ? "save" : "edit";
+
+            button.setAttribute('data-name-field', newValueAttribute);
+            button.classList.toggle("button-edit");
+            button.classList.toggle("button-save");
+
+            configureImgIntoButton(button);
+            invisibleButtonDelete(isEditing, playerID);
+
+            if (isEditing) {
+                editDataRowTable(playerID);
+            } else {
+                await sendForm(playerID);
+                await updateTableBody();
+            }
+        };
+
+        if (button.classList.contains("button-delete")) {
+            button.addEventListener('click', () => {
+                deleteAccountId(playerID);
+            });
+        } else {
+            button.addEventListener('click', handleClick);
+        }
+    }
+
+    function editDataRowTable(playerID) {
+        const rowDataById = document.querySelectorAll(`.account-${playerID}`);
+        rowDataById.forEach(elem => {
+            const dataField = elem.getAttribute("data-field");
+            if (arrayEditColumns.includes(dataField)) {
+                if (elem.tagName === 'INPUT') {
+                    elem.readOnly = false;
+                } else if (elem.tagName === 'SELECT') {
+                    elem.disabled = false;
+                }
+            }
+        });
+    }
+
+    async function sendForm(playerID) {
+        const accountData = {};
+        const rowDataById = document.querySelectorAll(`.account-${playerID}`);
+        rowDataById.forEach(elem => {
+            const dataField = elem.getAttribute("data-field");
+            if (arrayEditColumns.includes(dataField)) {
+                accountData[dataField] = elem.value;
+            }
+        });
+        const response = await fetch(`${pathDataForTable}/${playerID}`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(accountData)
+            }
+        );
+        userInform(response, 'edit');
+    }
+
+    function configureImgIntoButton(button) {
+
+        let nameField = button.getAttribute('data-name-field');
+        let imgElement = button.querySelector('img');
+        if (imgElement === null) {
+            imgElement = document.createElement("img");
+            button.appendChild(imgElement);
+        }
+
+        imgElement.alt = nameField;
+        imgElement.src = pathsSrcImg[nameField];
+    }
+
+    function invisibleButtonDelete(visibleFlag, playerId) {
+        const deleteButton = document.querySelector(`.account-${playerId}.button-delete`);
+        deleteButton.hidden = visibleFlag;
+    }
+
+    async function deleteAccountId(id) {
+        const response = await fetch(`${pathDataForTable}/${id}`,
+            {method: 'DELETE'}
+        );
+        userInform(response, "delete");
+        await renderDisplay();
+    }
+
+    document.querySelector('.form-create').addEventListener('submit', async function (event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+        const data = {};
+        formData.forEach((value, key) => {
+            data[key] = (key === 'birthday')
+                ? new Date(value).getTime()
+                : value;
+        });
+        const response = await fetch(`${pathDataForTable}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        this.reset();
+        userInform(response, 'create');
+        await renderDisplay();
+    });
+
+    function userInform(response, operation) {
+        fixElement.innerHTML = "";
+        const messages = {
+            delete: response.ok ? "Successful deletion" : "Failed delete",
+            edit: response.ok ? "Successful update" : "Failed update",
+            create: response.ok ? "Successful creation" : "Failed create",
+        };
+        fixElement.textContent = messages[operation] || "Unknown operation";
+        fixElement.style.background = response.ok ? 'green' : 'red';
+        fixElement.style.display = 'block';
+        setTimeout(function () {
+            fixElement.innerHTML = "";
+            fixElement.style.display = 'none';
+        }, 2000);
     }
 
     window.onload = start;

@@ -1,96 +1,270 @@
+:root {
+    --color-table-background: darkred;
+    --color-table-header: burlywood;
+    --color-table-row-even: aliceblue;
+    --color-table-row-odd: beige;
+    --shadow-base: 0 0 5px 0 darkred;
+    --shadow-around-element: 0 4px 15px rgba(0, 0, 0, 0.5);;
+    --shadow-fly-start: 0 10px 20px rgba(0, 0, 0, 0.2), 0 4px 8px rgba(0, 0, 0, 0.1);
+    --shadow-fly-end: 0 15px 30px rgba(0, 0, 0, 0.3), 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
 body {
     font-family: "Roboto Condensed", sans-serif;
     font-style: normal;
     margin: 0;
+    padding: 0;
+    background: mintcream;
+    border: 1px solid red;
 }
-h1 {
+
+footer,
+header {
+    padding: 5px;
+    width: auto;
+    background-color: black;
+    color: white;
     text-align: center;
+}
+
+footer {
+    margin-top: 15px;
 }
 
 section {
     display: grid;
     justify-content: center;
     justify-items: center;
-    border: 1px solid red;
-    background: mintcream;
+    padding: 10px;
 }
-.this-is-table{
-    background: snow;
-}
-ul {
-    display: table;
-    /*margin: 10px auto;
 
-     */
-    padding: 5px;
-    border: 2px solid black;
-    border-collapse: separate;
-    border-spacing: 5px;
+.quantity-per-page {
+    justify-self: start;
+    box-shadow: var(--shadow-around-element);
+    border-radius: 5px;
+    padding: 5px 10px 5px 10px;
 }
+
+.this-is-table {
+    background: var(--color-table-background);
+    border-radius: 5px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-fly-start);
+    transition: box-shadow 0.3s ease;
+}
+
+.this-is-table:hover {
+    box-shadow: var(--shadow-fly-end)
+}
+
+.this-is-caption {
+    display: table-caption;
+    color: white;
+    margin: 5px;
+    font-size: 1.5em;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.table {
+    display: table;
+    padding: 0;
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 2px;
+
+}
+
 .table-header {
     display: table-header-group;
     font-weight: bold;
     font-size: 1.2em;
 }
+
 .table-row {
     display: table-row;
 }
+
 .table li:nth-child(even) {
-    background-color: aliceblue;
+    background-color: var(--color-table-row-even);
 }
+
 .table li:nth-child(odd) {
-    background-color: beige;
+    background-color: var(--color-table-row-odd);
 }
-.table li:first-child {
-    background-color: burlywood;
+
+.table li.table-header {
+    background-color: var(--color-table-header);
 }
-.table span {
+
+.table-cell {
     display: table-cell;
     padding: 5px;
+    vertical-align: middle;
+    border-radius: 5px;
+}
+
+.table select.select-table-cell:disabled {
+    appearance: none;
+    border: none;
+    background: none;
+    font: inherit;
+    color: inherit;
+}
+
+.table li:nth-child(even) input:read-only {
+    border: none;
+    outline: none;
+    background-color: aliceblue;
+}
+
+.table li:nth-child(odd) input:read-only {
+    border: none;
+    outline: none;
+    background-color: beige;
 }
 
 .pagination {
     display: flex;
     flex-wrap: wrap;
-    /*margin: 0 auto;
-
-     */
-}
-
-/*.pagination inpu {
-    border: 1px solid darkred;
-    padding: 3px;
-}
-.pagination span:hover {
-    background: darkred;
-    color: white;
-    transform: scale(1.1);
-    transition: transform 0.1s ease;
-}
-*/
-
-
-.quantity-per-page{
-    justify-self: start;
-}
-
-/*для оформления кнопок страницы */
-input[type="radio"] {
-
+    align-items: center;
 }
 
 .pagination label {
-    /*cursor: pointer; /* Указываем, что метка кликабельна */
-    padding: 8px 12px; /* Добавляем отступы для меток */
-    border: 1px solid #ccc; /* Добавляем рамку */
-    border-radius: 4px; /* Закругляем углы */
-    margin: 0 5px; /* Добавляем отступы между метками */
-    background-color: #f9f9f9; /* Цвет фона */
-    transition: background-color 2s; /* Плавный переход для фона */
-
+    cursor: pointer;
+    padding: 5px 10px;
+    margin: 0 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+    font-size: 1.2em;
+    box-shadow: var(--shadow-around-element);
 }
 
-.pagination input[type="radio"]:checked {
-    background-color: red;/*#007bff; /* Цвет фона для выбранной метки */
-    color: white; /* Цвет текста для выбранной метки */
+.pagination label:hover {
+    box-shadow: inset 0 0 8px 0 black;
+}
+
+.pagination input[type="radio"] {
+    display: none;
+}
+
+.pagination input[type="radio"]:checked + label {
+    background-color: var(--color-table-background);
+    color: white;
+    font-weight: bold;
+    box-shadow: inset 0 0 8px 0 black;
+}
+
+hr {
+    border: none;
+    height: 2px;
+    background-color: black;
+    margin: 10px 0;
+    width: 100%;
+}
+
+.account-create {
+    justify-self: left;
+}
+
+.form-create {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    justify-content: start;
+}
+
+fieldset {
+    border: 1px solid var(--color-table-background);
+    border-radius: 5px;
+    padding: 10px;
+    background-color: var(--color-table-row-odd);
+    box-shadow: var(--shadow-around-element);
+}
+
+legend {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: var(--color-table-background);
+}
+
+form label {
+    font-weight: bold;
+}
+
+select {
+    background: white;
+}
+
+form input,
+form select {
+    margin-top: 5px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    transition: border-color 0.3s;
+}
+
+form input:focus,
+form select:focus {
+    border-color: var(--color-table-background);
+    outline: none;
+}
+
+form button {
+    padding: 10px;
+    background-color: var(--color-table-background);
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+}
+
+form button:hover {
+    cursor: pointer;
+    background-color: var(--color-table-header);
+    box-shadow: inset 0 0 8px 0 black;
+    color: black;
+    transition: background-color 0.2s ease,
+    color 0.3s ease;
+}
+
+.table button {
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.table button:hover {
+    box-shadow: inset 0 0 8px 0 black;
+}
+
+button img {
+    border-radius: 5px;
+}
+
+.fixed-element {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    padding: 20px;
+    margin: 20px;
+    font-size: 1.5em;
+    color: white;
+    border: 1px solid black;
+    border-radius: 15px;
+    background-color: white;
+    box-shadow: var(--shadow-around-element);
+    animation: 0.5s ease-out jump;
+}
+
+@keyframes jump {
+    0% {
+        bottom: -80px;
+    }
+    100% {
+        bottom: 0;
+    }
 }
