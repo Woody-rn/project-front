@@ -15,7 +15,6 @@ body {
     margin: 0;
     padding: 0;
     background: mintcream;
-    border: 1px solid red;
 }
 
 footer,
@@ -199,7 +198,10 @@ select {
 }
 
 form input,
-form select {
+form select,
+.table-row input,
+.table-row select,
+.quantity-per-page select {
     margin-top: 5px;
     padding: 5px;
     border: 1px solid #ccc;
@@ -208,8 +210,10 @@ form select {
 }
 
 form input:focus,
-form select:focus {
-    border-color: var(--color-table-background);
+form select:focus,
+.table-row input:focus,
+.table-row select:focus {
+    border: 1px solid var(--color-table-background);
     outline: none;
 }
 
